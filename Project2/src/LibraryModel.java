@@ -4,68 +4,129 @@
  * Created on:
  */
 
-
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 
 import javax.swing.*;
 
 public class LibraryModel {
 
-    // For use in creating dialogs and making them modal
-    private JFrame dialogParent;
+	// For use in creating dialogs and making them modal
+	private JFrame dialogParent;
 
-    public LibraryModel(JFrame parent, String userid, String password) {
-	dialogParent = parent;
-    }
+	private String url;
+	private Connection conn;
+	private Statement stmt;
+	private ResultSet res;
 
-    public String bookLookup(int isbn) {
-	return "Lookup Book Stub";
-    }
+	public LibraryModel(JFrame parent, String userid, String password) {
+		dialogParent = parent;
 
-    public String showCatalogue() {
-	return "Show Catalogue Stub";
-    }
+		this.url = String.format("jdbc:postgresql://db.ecs.vuw.ac.nz/%s_jdbc",
+				userid);
+		try {
+			this.conn = DriverManager.getConnection(url, userid, password);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		System.out.println("Connected to database " + url);
+	}
 
-    public String showLoanedBooks() {
-	return "Show Loaned Books Stub";
-    }
+	public String bookLookup(int isbn) {
 
-    public String showAuthor(int authorID) {
-	return "Show Author Stub";
-    }
+		try {
+		
+		String result = "Book Lookup\r\n";
+		stmt = conn.createStatement();
+		Book book = new Book();
+		
+		String query = String.format("SELECT * FROM Book WHERE ISBN = %d;", isbn);
+		res = stmt.executeQuery(query);
+		
+		if(!res.isBeforeFirst()){
+			return result + "No Results.\r\n";
+		}
+		
+		res.next();
+		book.ISBN = res.getInt("ISBN");
+		book.Title = res.getString("Title");
+		book.NumOfCop = res.getInt("NumOfCop");
+		book.NumLeft = res.getInt("NumLeft");
+		
+		query = String.format("SELECT AuthorSeqNo, Name, Surname FROM Author NATURAL JOIN (SELECT * FROM Book_Author WHERE ISBM = %d ORDER BY AuthorSeqNo) AS BookAuthor;", isbn);
+		res = stmt.executeQuery(query);
+		
+		while(res.next()){
+			Author auth = new Author();
+			auth.Name = res.getString("Name").trim();
+			auth.Surname = res.getString("Surname").trim();
+			book.authors.add(auth);
+		}
+		
+		result += book.toFullString();
+		
+		return result;
+		
+		} catch(SQLException e){
+			return "Error.  Please try again.";
+		} finally {
+			try {
+				res.close();
+				stmt.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+	}
 
-    public String showAllAuthors() {
-	return "Show All Authors Stub";
-    }
+	public String showCatalogue() {
+		return "Show Catalogue Stub";
+	}
 
-    public String showCustomer(int customerID) {
-	return "Show Customer Stub";
-    }
+	public String showLoanedBooks() {
+		return "Show Loaned Books Stub";
+	}
 
-    public String showAllCustomers() {
-	return "Show All Customers Stub";
-    }
+	public String showAuthor(int authorID) {
+		return "Show Author Stub";
+	}
 
-    public String borrowBook(int isbn, int customerID,
-			     int day, int month, int year) {
-	return "Borrow Book Stub";
-    }
+	public String showAllAuthors() {
+		return "Show All Authors Stub";
+	}
 
-    public String returnBook(int isbn, int customerid) {
-	return "Return Book Stub";
-    }
+	public String showCustomer(int customerID) {
+		return "Show Customer Stub";
+	}
 
-    public void closeDBConnection() {
-    }
-    
-    public String deleteCus(int customerID) {
-    	return "Delete Customer";
-    }
-    
-    public String deleteAuthor(int authorID) {
-    	return "Delete Author";
-    }
-    
-    public String deleteBook(int isbn) {
-    	return "Delete Book";
-    }
+	public String showAllCustomers() {
+		return "Show All Customers Stub";
+	}
+
+	public String borrowBook(int isbn, int customerID, int day, int month,
+			int year) {
+		return "Borrow Book Stub";
+	}
+
+	public String returnBook(int isbn, int customerid) {
+		return "Return Book Stub";
+	}
+
+	public void closeDBConnection() {
+	}
+
+	public String deleteCus(int customerID) {
+		return "Delete Customer";
+	}
+
+	public String deleteAuthor(int authorID) {
+		return "Delete Author";
+	}
+
+	public String deleteBook(int isbn) {
+		return "Delete Book";
+	}
 }
