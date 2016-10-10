@@ -50,7 +50,7 @@ public class LibraryModel {
 		
 		String query = "SELECT * FROM Book WHERE ISBN = ?;";
 		stmt = conn.prepareStatement(query);
-		stmt.setString(1,  ""+isbn);
+		stmt.setInt(1,  +isbn);
 		res = stmt.executeQuery(query);
 		
 		if(!res.isBeforeFirst()){
@@ -65,7 +65,7 @@ public class LibraryModel {
 		
 		query = "SELECT AuthorSeqNo, Name, Surname FROM Author NATURAL JOIN (SELECT * FROM Book_Author WHERE ISBN = ? ORDER BY AuthorSeqNo) AS BookAuthor;";
 		stmt = conn.prepareStatement(query);
-		stmt.setString(1, ""+isbn);
+		stmt.setInt(1, isbn);
 		res = stmt.executeQuery();
 		
 		while(res.next()){
@@ -115,8 +115,9 @@ public class LibraryModel {
 				
 				query = "SELECT AuthorSeqNo, Name, Surname FROM Author NATURAL JOIN (SELECT * FROM Book_Author WHERE ISBN = ? ORDER BY AuthorSeqNo) AS BookAuthor;";
 				stmt = conn.prepareStatement(query);
-				stmt.setString(1, ""+book.ISBN);
+				stmt.setInt(1, book.ISBN);
 				res = stmt.executeQuery();
+				
 				
 				while(res.next()){
 					Author auth = new Author();
