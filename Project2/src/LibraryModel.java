@@ -102,6 +102,7 @@ public class LibraryModel {
 			}
 			
 			while(res.next()){
+				System.out.println("here");
 				Book book = new Book();
 				book.ISBN = res.getInt("ISBN");
 				book.Title = res.getString("Title");
