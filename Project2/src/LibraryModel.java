@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 
 public class LibraryModel {
 
@@ -50,7 +51,7 @@ public class LibraryModel {
 		
 		String query = "SELECT * FROM Book WHERE ISBN = ?;";
 		stmt = conn.prepareStatement(query);
-		stmt.setInt(1,  +isbn);
+		stmt.setInt(1,  isbn);
 		res = stmt.executeQuery(query);
 		
 		if(!res.isBeforeFirst()){
@@ -80,8 +81,8 @@ public class LibraryModel {
 		return result;
 		
 		} catch(SQLException e){
-			System.out.println(e);
-			return "Error.  Please try again.";
+			JOptionPane.showMessageDialog(dialogParent, e.getMessage(), "Database Error", JOptionPane.ERROR_MESSAGE);
+			return "";
 		} finally {
 			try {
 				res.close();
@@ -95,7 +96,7 @@ public class LibraryModel {
 	public String showCatalogue() {
 		try {
 			
-			String result = "Book Lookup\r\n";
+			String result = "Catalogue\r\n";
 
 			String query = "SELECT * FROM Book ORDER BY ISBN;";
 			stmt = conn.prepareStatement(query);
@@ -104,9 +105,8 @@ public class LibraryModel {
 			if(!res.isBeforeFirst()){
 				return result + "No Results.\r\n";
 			}
-			
+		
 			while(res.next()){
-				System.out.println("here");
 				Book book = new Book();
 				book.ISBN = res.getInt("ISBN");
 				book.Title = res.getString("Title");
@@ -117,7 +117,6 @@ public class LibraryModel {
 				stmt = conn.prepareStatement(query);
 				stmt.setInt(1, book.ISBN);
 				res = stmt.executeQuery();
-				
 				
 				while(res.next()){
 					Author auth = new Author();
@@ -132,8 +131,8 @@ public class LibraryModel {
 			return result;
 			
 			} catch(SQLException e){
-				System.out.println(e);
-				return "Error.  Please try again.";
+				JOptionPane.showMessageDialog(dialogParent, e.getMessage(), "Database Error", JOptionPane.ERROR_MESSAGE);
+				return "";
 			} finally {
 				try {
 					res.close();

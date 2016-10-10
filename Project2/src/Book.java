@@ -18,8 +18,8 @@ public class Book {
 		String result = "";
 		result += String.format("\tISBN:\t%d\r\n", ISBN);
 		result += String.format("\tTitle:\t%s\r\n", Title);
-		result += String.format("\tNumOfCop:\t%d\r\n", NumOfCop);
-		result += String.format("\tNumOfCop:\t%d\r\n", NumLeft);
+		result += String.format("\tTotal Copies:\t%d\r\n", NumOfCop);
+		result += String.format("\tCopies available:\t%d\r\n", NumLeft);
 		// print authors
 		result += "\tAuthors:\t";
 		if(authors.isEmpty()){
