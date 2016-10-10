@@ -388,7 +388,70 @@ public class LibraryModel {
 	}
 
 	public String showAllCustomers() {
-		return "Show All Customers Stub";
+		try {
+
+			String result = "All Customers\r\n\r\n";
+
+			String query = "SELECT * FROM Customer ORDER BY l_name;";
+			stmt = conn.prepareStatement(query);
+			res = stmt.executeQuery();
+
+			if (!res.isBeforeFirst()) {
+				return result + "No Results.\r\n";
+			}
+			
+			List<Customer> customers = new ArrayList<>();
+			
+			while(res.next()){
+			
+				Customer customer = new Customer();
+			
+				customer.customerID = res.getInt("CustomerId");
+				customer.f_name = res.getString("f_name").trim();
+				customer.l_name = res.getString("l_name").trim();
+				customer.city = res.getString("City");
+			
+				//There isn't always a city, so check if there is, and trim if it exists..
+				if(customer.city != null){
+						customer.city = customer.city.trim();
+				}
+				
+				customers.add(customer);
+	
+			}
+	
+			for(Customer customer : customers){
+			
+				query = "SELECT Book.ISBN, Book.Title FROM Book, Cust_Book WHERE CustomerId = ? AND Book.ISBN = Cust_Book.ISBN;";
+				stmt = conn.prepareStatement(query);
+				stmt.setInt(1, customer.customerID);
+				res = stmt.executeQuery();
+	
+				while (res.next()) {
+					Book book = new Book();
+					book.ISBN = res.getInt("ISBN");
+					book.Title = res.getString("Title");
+					customer.borrowing.add(book);
+				}
+	
+				result += customer.toFullString() + "\r\n";
+			}
+
+			return result;
+
+		} catch (SQLException e) {
+			JOptionPane.showMessageDialog(dialogParent, e.getMessage(),
+					"Database Error", JOptionPane.ERROR_MESSAGE);
+			System.out.println(e);
+			return "";
+		} finally {
+			try {
+				res.close();
+				stmt.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 
 	public String borrowBook(int isbn, int customerID, int day, int month,
