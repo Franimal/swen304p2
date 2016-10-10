@@ -471,7 +471,7 @@ public class LibraryModel {
 
 			String result = "Delete Customer:\r\n\r\n";
 
-			String query = "DELETE Customer WHERE CustomerId = ?";
+			String query = "DELETE Customer WHERE CustomerId = ?;";
 			stmt = conn.prepareStatement(query);
 			stmt.setInt(1, customerID);
 			stmt.executeUpdate();
@@ -500,7 +500,7 @@ public class LibraryModel {
 
 			String result = "Delete Author:\r\n\r\n";
 
-			String query = "DELETE Author WHERE AuthorId = ?";
+			String query = "DELETE Author WHERE AuthorId = ?;";
 			stmt = conn.prepareStatement(query);
 			stmt.setInt(1, authorID);
 			stmt.executeUpdate();
@@ -529,7 +529,7 @@ public class LibraryModel {
 
 			String result = "Delete Book:\r\n\r\n";
 
-			String query = "DELETE Book WHERE ISBN = ?";
+			String query = "DELETE Book WHERE ISBN = ?;";
 			stmt = conn.prepareStatement(query);
 			stmt.setInt(1, isbn);
 			stmt.executeUpdate();
