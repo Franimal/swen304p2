@@ -98,7 +98,7 @@ public class LibraryModel {
 	public String showCatalogue() {
 		try {
 
-			String result = "Catalogue\r\n";
+			String result = "Catalogue\r\n\r\n";
 
 			String query = "SELECT * FROM Book ORDER BY ISBN;";
 			stmt = conn.prepareStatement(query);
@@ -155,7 +155,62 @@ public class LibraryModel {
 	}
 
 	public String showLoanedBooks() {
-		return "Show Loaned Books Stub";
+		try {
+
+			String result = "Loaned Books\r\n\r\n";
+
+			String query = "SELECT * FROM Book WHERE ISBN IN (SELECT ISBN FROM Cust_book);";
+			stmt = conn.prepareStatement(query);
+			res = stmt.executeQuery();
+
+			if (!res.isBeforeFirst()) {
+				return result + "No Results.\r\n";
+			}
+			List<Book> books = new ArrayList<>();
+			
+			while (res.next()) {
+				Book book = new Book();
+				book.ISBN = res.getInt("ISBN");
+				book.Title = res.getString("Title");
+				book.NumOfCop = res.getInt("NumOfCop");
+				book.NumLeft = res.getInt("NumLeft");
+				books.add(book);				
+			}
+			
+			stmt.close();
+			res.close();
+			
+			for(Book book : books){
+				query = "SELECT AuthorSeqNo, Name, Surname FROM Author NATURAL JOIN (SELECT * FROM Book_Author WHERE ISBN = ? ORDER BY AuthorSeqNo) AS BookAuthor;";
+				stmt = conn.prepareStatement(query);
+				stmt.setInt(1, book.ISBN);
+				res = stmt.executeQuery();
+
+				while (res.next()) {
+					Author auth = new Author();
+					auth.Name = res.getString("Name").trim();
+					auth.Surname = res.getString("Surname").trim();
+					book.authors.add(auth);
+				}
+
+				result += book.toFullString();
+			}
+
+			return result;
+
+		} catch (SQLException e) {
+			JOptionPane.showMessageDialog(dialogParent, e.getMessage(),
+					"Database Error", JOptionPane.ERROR_MESSAGE);
+			System.out.println(e);
+			return "";
+		} finally {
+			try {
+				res.close();
+				stmt.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 
 	public String showAuthor(int authorID) {
