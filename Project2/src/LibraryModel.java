@@ -59,7 +59,7 @@ public class LibraryModel {
 		book.NumOfCop = res.getInt("NumOfCop");
 		book.NumLeft = res.getInt("NumLeft");
 		
-		query = String.format("SELECT AuthorSeqNo, Name, Surname FROM Author NATURAL JOIN (SELECT * FROM Book_Author WHERE ISBM = %d ORDER BY AuthorSeqNo) AS BookAuthor;", isbn);
+		query = String.format("SELECT AuthorSeqNo, Name, Surname FROM Author NATURAL JOIN (SELECT * FROM Book_Author WHERE ISBN = %d ORDER BY AuthorSeqNo) AS BookAuthor;", isbn);
 		res = stmt.executeQuery(query);
 		
 		while(res.next()){
