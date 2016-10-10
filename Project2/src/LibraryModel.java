@@ -392,7 +392,7 @@ public class LibraryModel {
 
 			String result = "All Customers\r\n\r\n";
 
-			String query = "SELECT * FROM Customer ORDER BY l_name;";
+			String query = "SELECT * FROM Customer;";
 			stmt = conn.prepareStatement(query);
 			res = stmt.executeQuery();
 
@@ -467,14 +467,89 @@ public class LibraryModel {
 	}
 
 	public String deleteCus(int customerID) {
-		return "Delete Customer";
+		try {
+
+			String result = "Delete Customer:\r\n\r\n";
+
+			String query = "DELETE Customer WHERE CustomerId = ?";
+			stmt = conn.prepareStatement(query);
+			stmt.setInt(1, customerID);
+			stmt.executeUpdate();
+
+			result += "\r\n\t Successfully deleted customer " + customerID;
+			
+			return result;
+
+		} catch (SQLException e) {
+			JOptionPane.showMessageDialog(dialogParent, e.getMessage(),
+					"Database Error: Deletion failed", JOptionPane.ERROR_MESSAGE);
+			System.out.println(e);
+			return "";
+		} finally {
+			try {
+				res.close();
+				stmt.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 
 	public String deleteAuthor(int authorID) {
-		return "Delete Author";
+		try {
+
+			String result = "Delete Author:\r\n\r\n";
+
+			String query = "DELETE Author WHERE AuthorId = ?";
+			stmt = conn.prepareStatement(query);
+			stmt.setInt(1, authorID);
+			stmt.executeUpdate();
+
+			result += "\r\n\t Successfully deleted Author " + authorID;
+			
+			return result;
+
+		} catch (SQLException e) {
+			JOptionPane.showMessageDialog(dialogParent, e.getMessage(),
+					"Database Error: Deletion failed", JOptionPane.ERROR_MESSAGE);
+			System.out.println(e);
+			return "";
+		} finally {
+			try {
+				res.close();
+				stmt.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 
 	public String deleteBook(int isbn) {
-		return "Delete Book";
+		try {
+
+			String result = "Delete Book:\r\n\r\n";
+
+			String query = "DELETE Book WHERE ISBN = ?";
+			stmt = conn.prepareStatement(query);
+			stmt.setInt(1, isbn);
+			stmt.executeUpdate();
+
+			result += "\r\n\t Successfully deleted book with ISBN: " + isbn;
+			
+			return result;
+
+		} catch (SQLException e) {
+			JOptionPane.showMessageDialog(dialogParent, e.getMessage(),
+					"Database Error: Deletion failed", JOptionPane.ERROR_MESSAGE);
+			System.out.println(e);
+			return "";
+		} finally {
+			try {
+				res.close();
+				stmt.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 }
