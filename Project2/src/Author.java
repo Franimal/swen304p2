@@ -13,7 +13,7 @@ public class Author {
 		this.booksAuthored = new ArrayList<Book>();
 	}
 
-	public String compactName(){
+	public String initialAndLastName(){
 		return Name.charAt(0) + ". " + Surname; 
 	}
 

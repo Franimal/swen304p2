@@ -217,7 +217,7 @@ public class LibraryModel {
 
 		try {
 
-			String result = "Show Author\r\n\r\n";
+			String result = "Author\r\n\r\n";
 
 			String query = "SELECT * FROM Author WHERE AuthorId = ?;";
 			stmt = conn.prepareStatement(query);
@@ -268,7 +268,63 @@ public class LibraryModel {
 	}
 
 	public String showAllAuthors() {
-		return "Show All Authors Stub";
+		try {
+
+			String result = "All Authors\r\n\r\n";
+
+			String query = "SELECT * FROM Author;";
+			stmt = conn.prepareStatement(query);
+			res = stmt.executeQuery();
+
+			if (!res.isBeforeFirst()) {
+				return result + "No Results.\r\n";
+			}
+			
+			List<Author> authors = new ArrayList<>();
+			
+			while (res.next()) {
+				Author author = new Author();
+				
+				author.AuthorId = res.getInt("AuthorId");
+				author.Name = res.getString("Name").trim();
+				author.Surname = res.getString("Surname").trim();
+				authors.add(author);
+			}
+			
+			stmt.close();
+			res.close();
+			
+			for(Author author : authors){
+				query = "SELECT Book_Author.ISBN, Title FROM Book_Author, Book WHERE AuthorId = ? AND Book.ISBN = Book_Author.ISBN;";
+				stmt = conn.prepareStatement(query);
+				stmt.setInt(1, author.AuthorId);
+				res = stmt.executeQuery();
+
+				while (res.next()) {
+					Book book = new Book();
+					book.ISBN = res.getInt("ISBN");
+					book.Title = res.getString("Title");
+					author.booksAuthored.add(book);
+				}
+
+				result += author.toFullString();
+			}
+
+			return result;
+
+		} catch (SQLException e) {
+			JOptionPane.showMessageDialog(dialogParent, e.getMessage(),
+					"Database Error", JOptionPane.ERROR_MESSAGE);
+			System.out.println(e);
+			return "";
+		} finally {
+			try {
+				res.close();
+				stmt.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 
 	public String showCustomer(int customerID) {

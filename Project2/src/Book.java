@@ -26,7 +26,7 @@ public class Book {
 			result += "(None)";
 		} else {
 			for(Author auth: authors){
-				result += auth.compactName() + ", ";
+				result += auth.initialAndLastName() + ", ";
 			}
 			result = result.substring(0, result.length() - 3) + "\r\n"; 
 		}
