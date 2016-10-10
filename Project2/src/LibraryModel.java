@@ -24,9 +24,12 @@ public class LibraryModel {
 
 	public LibraryModel(JFrame parent, String userid, String password) {
 		dialogParent = parent;
-
-		this.url = String.format("jdbc:postgresql://db.ecs.vuw.ac.nz/%s_jdbc",
-				userid);
+		try {
+			Class.forName("org.postgresql.Driver");
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		}
+		this.url = "jdbc:postgresql://db.ecs.vuw.ac.nz/" + userid + "_jdbc";
 		try {
 			this.conn = DriverManager.getConnection(url, userid, password);
 		} catch (SQLException e) {
