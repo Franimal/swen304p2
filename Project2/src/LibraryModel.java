@@ -100,21 +100,28 @@ public class LibraryModel {
 
 			String result = "Catalogue\r\n";
 
-			String query = "SELECT * FROM Book;";
+			String query = "SELECT * FROM Book ORDER BY ISBN;";
 			stmt = conn.prepareStatement(query);
 			res = stmt.executeQuery();
 
 			if (!res.isBeforeFirst()) {
 				return result + "No Results.\r\n";
 			}
-
+			List<Book> books = new ArrayList<>();
+			
 			while (res.next()) {
 				Book book = new Book();
 				book.ISBN = res.getInt("ISBN");
 				book.Title = res.getString("Title");
 				book.NumOfCop = res.getInt("NumOfCop");
 				book.NumLeft = res.getInt("NumLeft");
-
+				books.add(book);				
+			}
+			
+			stmt.close();
+			res.close();
+			
+			for(Book book : books){
 				query = "SELECT AuthorSeqNo, Name, Surname FROM Author NATURAL JOIN (SELECT * FROM Book_Author WHERE ISBN = ? ORDER BY AuthorSeqNo) AS BookAuthor;";
 				stmt = conn.prepareStatement(query);
 				stmt.setInt(1, book.ISBN);
