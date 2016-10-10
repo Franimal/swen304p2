@@ -45,43 +45,45 @@ public class LibraryModel {
 	public String bookLookup(int isbn) {
 
 		try {
-		
-		String result = "Book Lookup\r\n";
-		Book book = new Book();
-		
-		String query = "SELECT * FROM Book WHERE ISBN = ?;";
-		stmt = conn.prepareStatement(query);
-		stmt.setInt(1,  isbn);
-		res = stmt.executeQuery(query);
-		
-		if(!res.isBeforeFirst()){
-			return result + "No Results.\r\n";
-		}
-		
-		res.next();
-		book.ISBN = res.getInt("ISBN");
-		book.Title = res.getString("Title");
-		book.NumOfCop = res.getInt("NumOfCop");
-		book.NumLeft = res.getInt("NumLeft");
-		
-		query = "SELECT AuthorSeqNo, Name, Surname FROM Author NATURAL JOIN (SELECT * FROM Book_Author WHERE ISBN = ? ORDER BY AuthorSeqNo) AS BookAuthor;";
-		stmt = conn.prepareStatement(query);
-		stmt.setInt(1, isbn);
-		res = stmt.executeQuery();
-		
-		while(res.next()){
-			Author auth = new Author();
-			auth.Name = res.getString("Name").trim();
-			auth.Surname = res.getString("Surname").trim();
-			book.authors.add(auth);
-		}
-		
-		result += book.toFullString();
-		
-		return result;
-		
-		} catch(SQLException e){
-			JOptionPane.showMessageDialog(dialogParent, e.getMessage(), "Database Error", JOptionPane.ERROR_MESSAGE);
+
+			String result = "Book Lookup\r\n";
+			Book book = new Book();
+
+			String query = "SELECT * FROM Book WHERE ISBN = ?;";
+			stmt = conn.prepareStatement(query);
+			stmt.setInt(1, isbn);
+			res = stmt.executeQuery(query);
+
+			if (!res.isBeforeFirst()) {
+				return result + "No Results.\r\n";
+			}
+
+			res.next();
+			book.ISBN = res.getInt("ISBN");
+			book.Title = res.getString("Title");
+			book.NumOfCop = res.getInt("NumOfCop");
+			book.NumLeft = res.getInt("NumLeft");
+
+			query = "SELECT AuthorSeqNo, Name, Surname FROM Author NATURAL JOIN (SELECT * FROM Book_Author WHERE ISBN = ? ORDER BY AuthorSeqNo) AS BookAuthor;";
+			stmt = conn.prepareStatement(query);
+			stmt.setInt(1, book.ISBN);
+			res = stmt.executeQuery();
+
+			while (res.next()) {
+				Author auth = new Author();
+				auth.Name = res.getString("Name").trim();
+				auth.Surname = res.getString("Surname").trim();
+				book.authors.add(auth);
+			}
+
+			result += book.toFullString();
+
+			return result;
+
+		} catch (SQLException e) {
+			JOptionPane.showMessageDialog(dialogParent, e.getMessage(),
+					"Database Error", JOptionPane.ERROR_MESSAGE);
+			System.out.println(e);
 			return "";
 		} finally {
 			try {
@@ -95,30 +97,30 @@ public class LibraryModel {
 
 	public String showCatalogue() {
 		try {
-			
+
 			String result = "Catalogue\r\n";
 
 			String query = "SELECT * FROM Book ORDER BY ISBN;";
 			stmt = conn.prepareStatement(query);
 			res = stmt.executeQuery();
-			
-			if(!res.isBeforeFirst()){
+
+			if (!res.isBeforeFirst()) {
 				return result + "No Results.\r\n";
 			}
-		
-			while(res.next()){
+
+			while (res.next()) {
 				Book book = new Book();
 				book.ISBN = res.getInt("ISBN");
 				book.Title = res.getString("Title");
 				book.NumOfCop = res.getInt("NumOfCop");
 				book.NumLeft = res.getInt("NumLeft");
-				
+
 				query = "SELECT AuthorSeqNo, Name, Surname FROM Author NATURAL JOIN (SELECT * FROM Book_Author WHERE ISBN = ? ORDER BY AuthorSeqNo) AS BookAuthor;";
 				stmt = conn.prepareStatement(query);
 				stmt.setInt(1, book.ISBN);
 				res = stmt.executeQuery();
-				
-				while(res.next()){
+
+				while (res.next()) {
 					Author auth = new Author();
 					auth.Name = res.getString("Name").trim();
 					auth.Surname = res.getString("Surname").trim();
@@ -126,21 +128,23 @@ public class LibraryModel {
 				}
 
 				result += book.toFullString();
-			}		
-			
-			return result;
-			
-			} catch(SQLException e){
-				JOptionPane.showMessageDialog(dialogParent, e.getMessage(), "Database Error", JOptionPane.ERROR_MESSAGE);
-				return "";
-			} finally {
-				try {
-					res.close();
-					stmt.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
 			}
+
+			return result;
+
+		} catch (SQLException e) {
+			JOptionPane.showMessageDialog(dialogParent, e.getMessage(),
+					"Database Error", JOptionPane.ERROR_MESSAGE);
+			System.out.println(e);
+			return "";
+		} finally {
+			try {
+				res.close();
+				stmt.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 
 	public String showLoanedBooks() {
