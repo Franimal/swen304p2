@@ -100,7 +100,7 @@ public class LibraryModel {
 
 			String result = "Catalogue\r\n";
 
-			String query = "SELECT * FROM Book ORDER BY ISBN;";
+			String query = "SELECT * FROM Book;";
 			stmt = conn.prepareStatement(query);
 			res = stmt.executeQuery();
 
