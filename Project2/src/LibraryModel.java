@@ -356,7 +356,7 @@ public class LibraryModel {
 				customer.city = customer.city.trim();
 			}
 
-			query = "SELECT ISBN, Title FROM Book, Cust_Book WHERE CustomerId = ? AND Book.ISBN = Cust_Book.ISBN;";
+			query = "SELECT Book.ISBN, Book.Title FROM Book, Cust_Book WHERE CustomerId = ? AND Book.ISBN = Cust_Book.ISBN;";
 			stmt = conn.prepareStatement(query);
 			stmt.setInt(1, customer.customerID);
 			res = stmt.executeQuery();
