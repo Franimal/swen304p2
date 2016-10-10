@@ -52,7 +52,7 @@ public class LibraryModel {
 			String query = "SELECT * FROM Book WHERE ISBN = ?;";
 			stmt = conn.prepareStatement(query);
 			stmt.setInt(1, isbn);
-			res = stmt.executeQuery(query);
+			res = stmt.executeQuery();
 
 			if (!res.isBeforeFirst()) {
 				return result + "No Results.\r\n";
