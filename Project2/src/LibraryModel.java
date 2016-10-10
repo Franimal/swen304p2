@@ -9,8 +9,10 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 
-import javax.swing.*;
+import javax.swing.JFrame;
 
 public class LibraryModel {
 
@@ -87,7 +89,51 @@ public class LibraryModel {
 	}
 
 	public String showCatalogue() {
-		return "Show Catalogue Stub";
+		try {
+			
+			String result = "Book Lookup\r\n";
+			stmt = conn.createStatement();
+			
+			String query = "SELECT * FROM Book ORDER BY ISBN;";
+			res = stmt.executeQuery(query);
+			
+			if(!res.isBeforeFirst()){
+				return result + "No Results.\r\n";
+			}
+			
+			while(res.next()){
+				Book book = new Book();
+				book.ISBN = res.getInt("ISBN");
+				book.Title = res.getString("Title");
+				book.NumOfCop = res.getInt("NumOfCop");
+				book.NumLeft = res.getInt("NumLeft");
+				
+				query = String.format("SELECT AuthorSeqNo, Name, Surname FROM Author NATURAL JOIN (SELECT * FROM Book_Author WHERE ISBN = %d ORDER BY AuthorSeqNo) AS BookAuthor;", book.ISBN);
+				res = stmt.executeQuery(query);
+				
+				while(res.next()){
+					Author auth = new Author();
+					auth.Name = res.getString("Name").trim();
+					auth.Surname = res.getString("Surname").trim();
+					book.authors.add(auth);
+				}
+
+				result += book.toFullString();
+			}		
+			
+			return result;
+			
+			} catch(SQLException e){
+				System.out.println(e);
+				return "Error.  Please try again.";
+			} finally {
+				try {
+					res.close();
+					stmt.close();
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+			}
 	}
 
 	public String showLoanedBooks() {
