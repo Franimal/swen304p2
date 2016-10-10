@@ -6,6 +6,7 @@
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -21,7 +22,7 @@ public class LibraryModel {
 
 	private String url;
 	private Connection conn;
-	private Statement stmt;
+	private PreparedStatement stmt;
 	private ResultSet res;
 
 	public LibraryModel(JFrame parent, String userid, String password) {
@@ -45,10 +46,11 @@ public class LibraryModel {
 		try {
 		
 		String result = "Book Lookup\r\n";
-		stmt = conn.createStatement();
 		Book book = new Book();
 		
-		String query = String.format("SELECT * FROM Book WHERE ISBN = %d;", isbn);
+		String query = "SELECT * FROM Book WHERE ISBN = ?;";
+		stmt = conn.prepareStatement(query);
+		stmt.setString(1,  ""+isbn);
 		res = stmt.executeQuery(query);
 		
 		if(!res.isBeforeFirst()){
@@ -61,8 +63,10 @@ public class LibraryModel {
 		book.NumOfCop = res.getInt("NumOfCop");
 		book.NumLeft = res.getInt("NumLeft");
 		
-		query = String.format("SELECT AuthorSeqNo, Name, Surname FROM Author NATURAL JOIN (SELECT * FROM Book_Author WHERE ISBN = %d ORDER BY AuthorSeqNo) AS BookAuthor;", isbn);
-		res = stmt.executeQuery(query);
+		query = "SELECT AuthorSeqNo, Name, Surname FROM Author NATURAL JOIN (SELECT * FROM Book_Author WHERE ISBN = ? ORDER BY AuthorSeqNo) AS BookAuthor;";
+		stmt = conn.prepareStatement(query);
+		stmt.setString(1, ""+isbn);
+		res = stmt.executeQuery();
 		
 		while(res.next()){
 			Author auth = new Author();
@@ -92,10 +96,10 @@ public class LibraryModel {
 		try {
 			
 			String result = "Book Lookup\r\n";
-			stmt = conn.createStatement();
-			
+
 			String query = "SELECT * FROM Book ORDER BY ISBN;";
-			res = stmt.executeQuery(query);
+			stmt = conn.prepareStatement(query);
+			res = stmt.executeQuery();
 			
 			if(!res.isBeforeFirst()){
 				return result + "No Results.\r\n";
@@ -109,8 +113,10 @@ public class LibraryModel {
 				book.NumOfCop = res.getInt("NumOfCop");
 				book.NumLeft = res.getInt("NumLeft");
 				
-				query = String.format("SELECT AuthorSeqNo, Name, Surname FROM Author NATURAL JOIN (SELECT * FROM Book_Author WHERE ISBN = %d ORDER BY AuthorSeqNo) AS BookAuthor;", book.ISBN);
-				res = stmt.executeQuery(query);
+				query = "SELECT AuthorSeqNo, Name, Surname FROM Author NATURAL JOIN (SELECT * FROM Book_Author WHERE ISBN = ? ORDER BY AuthorSeqNo) AS BookAuthor;";
+				stmt = conn.prepareStatement(query);
+				stmt.setString(1, ""+book.ISBN);
+				res = stmt.executeQuery();
 				
 				while(res.next()){
 					Author auth = new Author();
