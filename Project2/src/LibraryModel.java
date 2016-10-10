@@ -214,7 +214,57 @@ public class LibraryModel {
 	}
 
 	public String showAuthor(int authorID) {
-		return "Show Author Stub";
+
+		try {
+
+			String result = "Show Author\r\n\r\n";
+
+			String query = "SELECT * FROM Author WHERE AuthorId = ?;";
+			stmt = conn.prepareStatement(query);
+			stmt.setInt(1, authorID);
+			res = stmt.executeQuery();
+
+			if (!res.isBeforeFirst()) {
+				return result + "No Results.\r\n";
+			}
+
+			res.next();
+			
+			Author author = new Author();
+			
+			author.AuthorId = res.getInt("AuthorId");
+			author.Name = res.getString("Name").trim();
+			author.Surname = res.getString("Surname").trim();
+
+			query = "SELECT Book_Author.ISBN, Title FROM Book_Author, Book WHERE AuthorId = ? AND Book.ISBN = Book_Author.ISBN;";
+			stmt = conn.prepareStatement(query);
+			stmt.setInt(1, author.AuthorId);
+			res = stmt.executeQuery();
+
+			while (res.next()) {
+				Book book = new Book();
+				book.ISBN = res.getInt("ISBN");
+				book.Title = res.getString("Title");
+				author.booksAuthored.add(book);
+			}
+
+			result += author.toFullString() + "\r\n";
+
+			return result;
+
+		} catch (SQLException e) {
+			JOptionPane.showMessageDialog(dialogParent, e.getMessage(),
+					"Database Error", JOptionPane.ERROR_MESSAGE);
+			System.out.println(e);
+			return "";
+		} finally {
+			try {
+				res.close();
+				stmt.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 
 	public String showAllAuthors() {
