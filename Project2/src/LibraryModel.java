@@ -74,6 +74,7 @@ public class LibraryModel {
 		return result;
 		
 		} catch(SQLException e){
+			System.out.println(e);
 			return "Error.  Please try again.";
 		} finally {
 			try {
