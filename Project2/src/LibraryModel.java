@@ -589,8 +589,118 @@ public class LibraryModel {
 
 	}
 
-	public String returnBook(int isbn, int customerid) {
-		return "Return Book Stub";
+	public String returnBook(int isbn, int customerID) {
+	
+		
+		try {
+		
+			String result = "Return Book\r\n\n";
+		
+			String cust_name = "";
+			String book_title = "";
+			
+			//Begin our transaction
+			conn.setAutoCommit(false);
+			
+			//Make sure customer exists, lock customer
+			String query = "SELECT * FROM Customer WHERE CustomerId = ? FOR UPDATE";
+			stmt = conn.prepareStatement(query);
+			stmt.setInt(1,  customerID);
+			res = stmt.executeQuery();
+			
+			//If there are no results, rollback.
+			if(!res.isBeforeFirst()){
+				conn.rollback();
+				return result + "\tCustomer " + customerID + " does not exist in database.\r\n";
+			}
+			
+			res.next();
+			String f_name = res.getString("f_name").trim();
+			String l_name = res.getString("l_name").trim();
+			cust_name = f_name + " " + l_name;
+			
+			//Make sure book exists, lock book
+			query = "SELECT * FROM Book WHERE ISBN = ? FOR UPDATE";
+			stmt = conn.prepareStatement(query);
+			stmt.setInt(1,  isbn);
+			res = stmt.executeQuery();
+			
+			//If no results, rollback..
+			if(!res.isBeforeFirst()){
+				conn.rollback();
+				return result + "\tBook " + isbn + " does not exist in database.\r\n";
+			}
+			
+			res.next();
+			book_title = res.getString("title").trim();
+			
+ 			//Make sure book is on loan
+			int available = res.getInt("numLeft");
+			int totalCopies = res.getInt("NumOnCop");
+			if(available >= totalCopies){
+				conn.rollback();
+				return result + "\t There are no copies of '" + book_title + "' (" + isbn + ") on loan.  Stopping transaction.\r\n"; 
+			}
+			
+			//Make sure the customer is loaning this book out
+			query = "SELECT * FROM Cust_Book WHERE CustomerId = ?;";
+			stmt = conn.prepareStatement(query);
+			stmt.setInt(1,  customerID);
+			res = stmt.executeQuery();
+			
+			if(!res.isBeforeFirst()){
+				conn.rollback();
+				return result = "\t Customer " + cust_name + "(" + customerID + ") does not have item " + isbn + " on loan.\r\t";  
+			}
+			
+			//Delete entry from Cust_Book
+			query = "DELETE FROM Cust_Book WHERE CustomerId = ?;";
+			stmt = conn.prepareStatement(query);
+			stmt.setInt(1,  customerID);
+			
+			int updateResult = stmt.executeUpdate();
+			
+			if(updateResult != 1){
+				conn.rollback();
+				return result + "\t Book could not be returned.  Try again, or contact the system administrator.";
+			}
+			
+			//pause on confirmation screen for testing purposes
+			JOptionPane.showMessageDialog(dialogParent, "Paused transaction.  Press OK to confirm book return.", "Paused", JOptionPane.OK_OPTION);
+			
+			//Set numLeft for book to numLeft + 1 
+			query = "UPDATE Book SET numLeft = numLeft + 1 WHERE ISBN = ?;";
+			stmt = conn.prepareStatement(query);
+			stmt.setInt(1,  isbn);
+			
+			updateResult = stmt.executeUpdate();
+			
+			if(updateResult != 1){
+				conn.rollback();
+				return result + "\t Book could not be returned.  Try again, or contact the system administrator.";
+			}
+			
+			//commit transaction, and return result
+			conn.commit();
+			conn.setAutoCommit(true);
+			result += "\t" + cust_name + " (" + customerID + ") successfully returned " + book_title + " (" + isbn + ").";
+			
+			return result;
+			
+		} catch (SQLException e){
+			JOptionPane.showMessageDialog(dialogParent, e.getMessage(),
+					"Database Error", JOptionPane.ERROR_MESSAGE);
+			System.out.println(e);
+			return "";
+		} finally {
+			try {
+				res.close();
+				stmt.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+
 	}
 
 	public void closeDBConnection() {
