@@ -521,7 +521,7 @@ public class LibraryModel {
 			}
 			
 			//Create new entry in Cust_Book
-			String dueDate = String.format("%04d-%04d-%04d", year, month, day);
+			String dueDate = String.format("%04d-%02d-%02d", year, month, day);
 			query = "INSERT INTO Cust_Book (CustomerId, DueDate, ISBN) VALUES (?, DATE '?', ?);";
 			stmt = conn.prepareStatement(query);
 			stmt.setInt(1,  customerID);
