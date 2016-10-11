@@ -636,7 +636,7 @@ public class LibraryModel {
 			
  			//Make sure book is on loan
 			int available = res.getInt("numLeft");
-			int totalCopies = res.getInt("NumOnCop");
+			int totalCopies = res.getInt("NumOfCop");
 			if(available >= totalCopies){
 				conn.rollback();
 				return result + "\t There are no copies of '" + book_title + "' (" + isbn + ") on loan.  Stopping transaction.\r\n"; 
