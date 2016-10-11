@@ -456,7 +456,121 @@ public class LibraryModel {
 
 	public String borrowBook(int isbn, int customerID, int day, int month,
 			int year) {
-		return "Borrow Book Stub";
+		
+		
+		try {
+		
+			String result = "Borrow Book\r\n\n";
+		
+			String cust_name = "";
+			int cust_id = -1;
+			int book_isbn = -1;
+			String book_title = "";
+			
+			//Begin our transaction
+			conn.setAutoCommit(false);
+			
+			//Make sure customer exists, lock customer
+			String query = "SELECT * FROM Customer WHERE CustomerId = ? FOR UPDATE";
+			stmt = conn.prepareStatement(query);
+			stmt.setInt(1,  customerID);
+			res = stmt.executeQuery();
+			
+			//If there are no results, rollback.
+			if(!res.isBeforeFirst()){
+				conn.rollback();
+				return result + "\tCustomer " + customerID + " does not exist in database.\r\n";
+			}
+			
+			res.next();
+			String f_name = res.getString("f_name").trim();
+			String l_name = res.getString("l_name").trim();
+			cust_name = f_name + " " + l_name;
+			
+			//Make sure book exists, lock book
+			query = "SELECT * FROM Book WHERE ISBN = ? FOR UPDATE";
+			stmt = conn.prepareStatement(query);
+			stmt.setInt(1,  isbn);
+			res = stmt.executeQuery();
+			
+			//If no results, rollback..
+			if(!res.isBeforeFirst()){
+				conn.rollback();
+				return result + "\tBook " + isbn + " does not exist in database.\r\n";
+			}
+			
+			res.next();
+			book_title = res.getString("title").trim();
+			
+ 			//Make sure book is available to loan
+			int available = res.getInt("numLeft");
+			if(available == 0){
+				conn.rollback();
+				return result + "\t There are no copies available of '" + book_title + "' (" + isbn + ").\r\n"; 
+			}
+			
+			//Make sure this customer isn't already loaning this book out
+			query = "SELECT * FROM Cust_Book WHERE CustomerId = ?;";
+			stmt = conn.prepareStatement(query);
+			stmt.setInt(1,  customerID);
+			res = stmt.executeQuery();
+			
+			if(res.isBeforeFirst()){
+				conn.rollback();
+				return result = "\t Customer " + cust_name + "(" + customerID + ") already has item " + isbn + " on loan.\r\t";  
+			}
+			
+			//Create new entry in Cust_Book
+			String dueDate = String.format("%04d-%04d-%04d", year, month, day);
+			query = "INSERT INTO Cust_Book (CustomerId, DueDate, ISBN) VALUES (?, DATE '?', ?);";
+			stmt = conn.prepareStatement(query);
+			stmt.setInt(1,  customerID);
+			stmt.setString(2,  dueDate);
+			stmt.setInt(3,  isbn);
+			
+			int updateResult = stmt.executeUpdate();
+			
+			if(updateResult != 1){
+				conn.rollback();
+				return result + "\t Book could not be borrowed.  Try again, or contact the system administrator.";
+			}
+			
+			//pause on confirmation screen for testing purposes
+			JOptionPane.showMessageDialog(dialogParent, "Paused transaction.  Press OK to confirm.", "Paused", JOptionPane.OK_OPTION);
+			
+			//Set numLeft for book to numLeft -1 
+			query = "UPDATE Book SET numLeft = numLeft - 1 WHERE ISBN = ?;";
+			stmt = conn.prepareStatement(query);
+			stmt.setInt(1,  isbn);
+			
+			updateResult = stmt.executeUpdate();
+			
+			if(updateResult != 1){
+				conn.rollback();
+				return result + "\t Book could not be borrowed.  Try again, or contact the system administrator.";
+			}
+			
+			//commit transaction, and return result
+			conn.commit();
+			
+			result += "\t" + cust_name + " (" + customerID + ") successfully borrowed " + book_title + " (" + isbn + ").  Due back on " + dueDate;
+			
+			return result;
+			
+		} catch (SQLException e){
+			JOptionPane.showMessageDialog(dialogParent, e.getMessage(),
+					"Database Error", JOptionPane.ERROR_MESSAGE);
+			System.out.println(e);
+			return "";
+		} finally {
+			try {
+				res.close();
+				stmt.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+
 	}
 
 	public String returnBook(int isbn, int customerid) {
@@ -464,8 +578,19 @@ public class LibraryModel {
 	}
 
 	public void closeDBConnection() {
+		try{
+			conn.close();
+			System.out.println("Closed database connection.");
+		} catch (SQLException e){
+			JOptionPane.showMessageDialog(dialogParent, e.getMessage(), "Database Error", JOptionPane.ERROR_MESSAGE);
+		}
 	}
 
+	/**
+	 * Deletes a customer from the database.  Should only delete if they are not currently borrowing any books.  TODO
+	 * @param customerID
+	 * @return
+	 */
 	public String deleteCus(int customerID) {
 		try {
 
@@ -495,6 +620,11 @@ public class LibraryModel {
 		}
 	}
 
+	/**
+	 * Deletes an author from the database.  Should only delete if there are no books in the DB written by them.  TODO
+	 * @param authorID
+	 * @return
+	 */
 	public String deleteAuthor(int authorID) {
 		try {
 
@@ -524,6 +654,11 @@ public class LibraryModel {
 		}
 	}
 
+	/**
+	 * Deletes a book from the database.  Should only delete if noone is currently borrowing this book.  TODO
+	 * @param isbn
+	 * @return
+	 */
 	public String deleteBook(int isbn) {
 		try {
 
