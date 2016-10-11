@@ -193,8 +193,24 @@ public class LibraryModel {
 					auth.Surname = res.getString("Surname").trim();
 					book.authors.add(auth);
 				}
-
+				
+				query = "SELECT * FROM Customer NATURAL JOIN Cust_Book;";
+				stmt = conn.prepareStatement(query);
+				res = stmt.executeQuery();
+				
+				while(res.next()){
+					Customer cust = new Customer();
+					
+					cust.customerID = res.getInt("CustomerID");
+					cust.f_name = res.getString("F_Name").trim();
+					cust.l_name = res.getString("L_Name").trim();
+					cust.city = res.getString("City").trim();
+					
+					book.borrowedBy.add(cust);
+				}
+				
 				result += book.toFullString();
+				
 			}
 
 			return result;
@@ -520,7 +536,7 @@ public class LibraryModel {
 			}
 			
 			//Create new entry in Cust_Book
-			String dueDate = String.format("%04d-%02d-%02d", year, month, day);
+			String dueDate = String.format("%04d-%02d-%02d", year, month+1, day);
 			Date date = Date.valueOf(dueDate);
 			query = "INSERT INTO Cust_Book (CustomerId, DueDate, ISBN) VALUES (?, ?, ?);";
 			stmt = conn.prepareStatement(query);
