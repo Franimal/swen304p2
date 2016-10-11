@@ -5,6 +5,7 @@
  */
 
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -519,11 +520,12 @@ public class LibraryModel {
 			}
 			
 			//Create new entry in Cust_Book
-			String dueDate = String.format("'%04d-%02d-%02d'", year, month, day);
-			query = "INSERT INTO Cust_Book (CustomerId, DueDate, ISBN) VALUES (?, date ?, ?);";
+			String dueDate = String.format("%04d-%02d-%02d", year, month, day);
+			Date date = Date.valueOf(dueDate);
+			query = "INSERT INTO Cust_Book (CustomerId, DueDate, ISBN) VALUES (?, ?, ?);";
 			stmt = conn.prepareStatement(query);
 			stmt.setInt(1,  customerID);
-			stmt.setString(2,  dueDate);
+			stmt.setDate(2,  date);
 			stmt.setInt(3,  isbn);
 			
 			int updateResult = stmt.executeUpdate();
