@@ -463,8 +463,6 @@ public class LibraryModel {
 			String result = "Borrow Book\r\n\n";
 		
 			String cust_name = "";
-			int cust_id = -1;
-			int book_isbn = -1;
 			String book_title = "";
 			
 			//Begin our transaction
@@ -522,7 +520,7 @@ public class LibraryModel {
 			
 			//Create new entry in Cust_Book
 			String dueDate = String.format("%04d-%02d-%02d", year, month, day);
-			query = "INSERT INTO Cust_Book (CustomerId, DueDate, ISBN) VALUES (?, DATE '?', ?);";
+			query = "INSERT INTO Cust_Book (CustomerId, DueDate, ISBN) VALUES (?, date '?', ?);";
 			stmt = conn.prepareStatement(query);
 			stmt.setInt(1,  customerID);
 			stmt.setString(2,  dueDate);
@@ -552,7 +550,7 @@ public class LibraryModel {
 			
 			//commit transaction, and return result
 			conn.commit();
-			
+			conn.setAutoCommit(true);
 			result += "\t" + cust_name + " (" + customerID + ") successfully borrowed " + book_title + " (" + isbn + ").  Due back on " + dueDate;
 			
 			return result;
