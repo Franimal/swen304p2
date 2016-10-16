@@ -1,9 +1,3 @@
-/*
- * LibraryModel.java
- * Author:
- * Created on:
- */
-
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.DriverManager;
@@ -19,7 +13,6 @@ import javax.swing.JOptionPane;
 
 public class LibraryModel {
 
-	// For use in creating dialogs and making them modal
 	private JFrame dialogParent;
 
 	private String url;
