@@ -2,6 +2,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Book {
+	
 	public int ISBN;
 	public String Title;
 	public int NumOfCop;
@@ -20,7 +21,7 @@ public class Book {
 		result += String.format("\tTitle:\t%s\r\n", Title);
 		result += String.format("\tTotal Copies:\t%d\r\n", NumOfCop);
 		result += String.format("\tCopies available:\t%d\r\n", NumLeft);
-		// print authors
+		
 		result += "\tAuthors:\t";
 		if(authors.isEmpty()){
 			result += "(None)";
