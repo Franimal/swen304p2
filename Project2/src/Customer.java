@@ -3,11 +3,11 @@ import java.util.List;
 
 
 public class Customer {
-	int customerID;
-	String f_name;
-	String l_name;
-	String city;
-	List<Book> borrowing;
+	public int customerID;
+	public String f_name;
+	public String l_name;
+	public String city;
+	public List<Book> borrowing;
 
 	public Customer(){
 		borrowing = new ArrayList<Book>();
