@@ -4,10 +4,10 @@ import java.util.List;
 
 public class Author {
 
-	int AuthorId;
-	String Name;
-	String Surname;
-	List<Book> booksAuthored;
+	public int AuthorId;
+	public String Name;
+	public String Surname;
+	public List<Book> booksAuthored;
 
 	public Author(){
 		this.booksAuthored = new ArrayList<Book>();
